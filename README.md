@@ -219,7 +219,7 @@
             { id: 'dev_fast', label: '🚀 Está se desenvolvendo rápido' },
             { id: 'dev_diff', label: '🧩 Dificuldades em algo específico' },
             { id: 'nap_good', label: '😴 Dormiu / Descansou bem' }
-            { id: 'nap_good', label: '😴 Não Dormiu / Descansou bem' }
+            { id: 'nap_good', label: '😴 Não Dormiu ' }
         ];
 
         let selectedTags = [];
