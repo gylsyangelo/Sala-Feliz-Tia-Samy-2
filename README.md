@@ -206,11 +206,11 @@
 
     </main>
 
-    <script>
-        let students = JSON.parse(localStorage.getItem('app_students')) || ['Ana Silva', 'Lucas Gabriel', 'Sofia Costa'];
-        let logs = JSON.parse(localStorage.getItem('app_logs')) || [];
+   <script>
+    let students = [];
+    let logs = JSON.parse(localStorage.getItem('app_logs')) || [];
 
-       const availableTags = [
+    const availableTags = [
         { id: 'eat_good', label: '🍎 Comeu bem' },
         { id: 'eat_bad', label: '🥗 Não comeu bem / recusou' },
         { id: 'behavior_good', label: '⭐ Se comportou muito bem' },
@@ -221,181 +221,180 @@
         { id: 'nap_good', label: '😴 Dormiu / Descansou bem' },
         { id: 'nap_none', label: '😴 Não dormiu' }
     ];
-        let selectedTags = [];
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('diaryDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('reportMonth').value = new Date().toISOString().slice(0, 7);
+    let selectedTags = [];
 
-            renderTags();
-            updateStudentDropdowns();
-            renderStudentsList();
-            renderRecentLogs();
-            lucide.createIcons();
+    // Busca os dados centralizados do arquivo conteudo.json do GitHub
+    async function loadDataFromGitHub() {
+        try {
+            const response = await fetch('./conteudo.json?cache=' + Date.now());
+            if (response.ok) {
+                const data = await response.json();
+                if (data.alunos) {
+                    students = data.alunos;
+                    updateStudentDropdowns();
+                    renderStudentsList();
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao carregar os dados de alunos do GitHub:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('diaryDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('reportMonth').value = new Date().toISOString().slice(0, 7);
+
+        renderTags();
+        loadDataFromGitHub(); // Carrega os alunos vindos do GitHub
+        renderRecentLogs();
+        lucide.createIcons();
+    });
+
+    function switchTab(tabName) {
+        ['diary', 'report', 'students'].forEach(t => {
+            document.getElementById(`view-${t}`).classList.add('hidden');
+            document.getElementById(`tabBtn-${t}`).className = "px-4 py-2 rounded-lg font-semibold text-xs transition-all duration-200 text-blue-100 hover:text-white hover:bg-blue-600/50 flex items-center gap-2";
         });
 
-        function switchTab(tabName) {
-            ['diary', 'report', 'students'].forEach(t => {
-                document.getElementById(`view-${t}`).classList.add('hidden');
-                document.getElementById(`tabBtn-${t}`).className = "px-4 py-2 rounded-lg font-semibold text-xs transition-all duration-200 text-blue-100 hover:text-white hover:bg-blue-600/50 flex items-center gap-2";
-            });
+        document.getElementById(`view-${tabName}`).classList.remove('hidden');
+        document.getElementById(`tabBtn-${tabName}`).className = "px-4 py-2 rounded-lg font-semibold text-xs transition-all duration-200 bg-pink-500 text-white shadow-md flex items-center gap-2";
+    }
 
-            document.getElementById(`view-${tabName}`).classList.remove('hidden');
-            document.getElementById(`tabBtn-${tabName}`).className = "px-4 py-2 rounded-lg font-semibold text-xs transition-all duration-200 bg-pink-500 text-white shadow-md flex items-center gap-2";
+    function renderTags() {
+        const container = document.getElementById('tagsContainer');
+        container.innerHTML = availableTags.map(tag => `
+            <button type="button" onclick="toggleTag('${tag.id}')" id="tagBtn-${tag.id}" 
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-blue-100 transition-all duration-150 flex items-center gap-1 bg-blue-50/60 text-blue-900 hover:bg-pink-100 hover:text-pink-700">
+                <span>${tag.label}</span>
+            </button>
+        `).join('');
+    }
+
+    function toggleTag(tagId) {
+        const index = selectedTags.indexOf(tagId);
+        const btn = document.getElementById(`tagBtn-${tagId}`);
+
+        if (index === -1) {
+            selectedTags.push(tagId);
+            btn.classList.remove('bg-blue-50/60', 'text-blue-900', 'border-blue-100');
+            btn.classList.add('bg-pink-500', 'text-white', 'border-pink-500', 'shadow-sm');
+        } else {
+            selectedTags.splice(index, 1);
+            btn.classList.remove('bg-pink-500', 'text-white', 'border-pink-500', 'shadow-sm');
+            btn.classList.add('bg-blue-50/60', 'text-blue-900', 'border-blue-100');
+        }
+    }
+
+    document.getElementById('diaryForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const student = document.getElementById('diaryStudentSelect').value;
+        const date = document.getElementById('diaryDate').value;
+        const notes = document.getElementById('diaryNotes').value;
+
+        if (!student) return alert('Por favor, selecione uma criança.');
+
+        const newLog = { id: Date.now(), student, date, tags: [...selectedTags], notes };
+        logs.unshift(newLog);
+        localStorage.setItem('app_logs', JSON.stringify(logs));
+
+        document.getElementById('diaryNotes').value = '';
+        selectedTags = [];
+        renderTags();
+        renderRecentLogs();
+        alert('Registro salvo com sucesso!');
+    });
+
+    function renderRecentLogs() {
+        const container = document.getElementById('recentLogs');
+        if (logs.length === 0) {
+            container.innerHTML = `<p class="text-sm text-slate-400 italic">Nenhum registro encontrado.</p>`;
+            return;
         }
 
-        function renderTags() {
-            const container = document.getElementById('tagsContainer');
-            container.innerHTML = availableTags.map(tag => `
-                <button type="button" onclick="toggleTag('${tag.id}')" id="tagBtn-${tag.id}" 
-                    class="px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-blue-100 transition-all duration-150 flex items-center gap-1 bg-blue-50/60 text-blue-900 hover:bg-pink-100 hover:text-pink-700">
-                    <span>${tag.label}</span>
-                </button>
-            `).join('');
-        }
+        container.innerHTML = logs.slice(0, 5).map(log => {
+            const tagLabels = log.tags.map(tid => {
+                const found = availableTags.find(t => t.id === tid);
+                return found ? `<span class="bg-pink-50 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-md border border-pink-100">${found.label}</span>` : '';
+            }).join(' ');
 
-        function toggleTag(tagId) {
-            const index = selectedTags.indexOf(tagId);
-            const btn = document.getElementById(`tagBtn-${tagId}`);
-
-            if (index === -1) {
-                selectedTags.push(tagId);
-                btn.classList.remove('bg-blue-50/60', 'text-blue-900', 'border-blue-100');
-                btn.classList.add('bg-pink-500', 'text-white', 'border-pink-500', 'shadow-sm');
-            } else {
-                selectedTags.splice(index, 1);
-                btn.classList.remove('bg-pink-500', 'text-white', 'border-pink-500', 'shadow-sm');
-                btn.classList.add('bg-blue-50/60', 'text-blue-900', 'border-blue-100');
-            }
-        }
-
-        document.getElementById('diaryForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const student = document.getElementById('diaryStudentSelect').value;
-            const date = document.getElementById('diaryDate').value;
-            const notes = document.getElementById('diaryNotes').value;
-
-            if (!student) return alert('Por favor, selecione uma criança.');
-
-            const newLog = { id: Date.now(), student, date, tags: [...selectedTags], notes };
-            logs.unshift(newLog);
-            localStorage.setItem('app_logs', JSON.stringify(logs));
-
-            document.getElementById('diaryNotes').value = '';
-            selectedTags = [];
-            renderTags();
-            renderRecentLogs();
-            alert('Registro salvo com sucesso!');
-        });
-
-        function renderRecentLogs() {
-            const container = document.getElementById('recentLogs');
-            if (logs.length === 0) {
-                container.innerHTML = `<p class="text-sm text-slate-400 italic">Nenhum registro encontrado.</p>`;
-                return;
-            }
-
-            container.innerHTML = logs.slice(0, 5).map(log => {
-                const tagLabels = log.tags.map(tid => {
-                    const found = availableTags.find(t => t.id === tid);
-                    return found ? `<span class="bg-pink-50 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-md border border-pink-100">${found.label}</span>` : '';
-                }).join(' ');
-
-                return `
-                    <div class="p-3.5 bg-blue-50/30 rounded-2xl border border-blue-100 text-sm space-y-1.5">
-                        <div class="flex justify-between font-bold text-blue-950">
-                            <span>${log.student}</span>
-                            <span class="text-xs text-blue-400 font-medium">${log.date}</span>
-                        </div>
-                        <div class="flex flex-wrap gap-1">${tagLabels}</div>
-                        ${log.notes ? `<p class="text-xs text-slate-600 mt-1 italic">"${log.notes}"</p>` : ''}
+            return `
+                <div class="p-3.5 bg-blue-50/30 rounded-2xl border border-blue-100 text-sm space-y-1.5">
+                    <div class="flex justify-between font-bold text-blue-950">
+                        <span>${log.student}</span>
+                        <span class="text-xs text-blue-400 font-medium">${log.date}</span>
                     </div>
-                `;
-            }).join('');
-        }
-
-        function generateReport() {
-            const student = document.getElementById('reportStudentSelect').value;
-            const monthStr = document.getElementById('reportMonth').value;
-
-            if (!student || !monthStr) return alert('Selecione o aluno e o mês.');
-
-            const studentLogs = logs.filter(l => l.student === student && l.date.startsWith(monthStr));
-            document.getElementById('repStudentName').innerText = student;
-            document.getElementById('repPeriod').innerText = `Período: Mês ${monthStr.split('-')[1]}/${monthStr.split('-')[0]}`;
-            
-            document.getElementById('printableReport').classList.remove('hidden');
-
-            if (studentLogs.length === 0) {
-                document.getElementById('repText').innerText = "Não existem anotações registradas para este aluno no mês selecionado.";
-                document.getElementById('repLogList').innerHTML = "<p class='text-xs text-slate-400'>Nenhum histórico encontrado para este período.</p>";
-                return;
-            }
-
-            let tagCounts = {};
-            studentLogs.forEach(l => {
-                l.tags.forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
-            });
-
-            let narrative = `Relatório avaliativo mensal referente ao desenvolvimento da criança ${student}.\n\n`;
-            if (tagCounts['eat_good'] > 1) narrative += `Durante o mês, a criança demonstrou ótima adaptação nas refeições, alimentando-se bem na maior parte dos dias. `;
-            if (tagCounts['eat_bad'] > 0) narrative += `Em alguns momentos do mês apresentou certa recusa alimentar, sendo acompanhada com carinho pela equipe. `;
-            if (tagCounts['behavior_good'] > 1) narrative += `Apresentou excelente comportamento geral, demonstrando bom convívio e empatia com os colegas. `;
-            if (tagCounts['behavior_issue'] > 0) narrative += `Houve alguns episódios pontuais de desobediência ou agitação, nos quais trabalhamos o diálogo e a mediação. `;
-            if (tagCounts['sick'] > 0) narrative += `Foram notados alguns dias de indisposição ou sintomas de saúde, exigindo maior atenção e cuidado no período de repouso. `;
-            if (tagCounts['dev_fast'] > 0) narrative += `Destacou-se por apresentar um ritmo de desenvolvimento acelerado e muita facilidade nas atividades propostas. `;
-            if (tagCounts['dev_diff'] > 0) narrative += `Em relação a algumas tarefas, foram identificadas dificuldades pontuais que continuaremos estimulando e apoiando de perto. `;
-
-            narrative += `\n\nNo geral, o aluno(a) segue avançando de forma positiva e enriquecedora em sua jornada escolar ao longo deste mês.`;
-            document.getElementById('repText').innerText = narrative;
-
-            document.getElementById('repLogList').innerHTML = studentLogs.map(l => `
-                <div class="p-3 bg-blue-50/40 rounded-xl text-xs border border-blue-100">
-                    <span class="font-bold text-blue-900">${l.date}:</span> 
-                    ${l.tags.map(tid => availableTags.find(t => t.id === tid)?.label).filter(Boolean).join(', ')}
-                    ${l.notes ? `<span class="block text-slate-500 mt-1 italic">Obs: ${l.notes}</span>` : ''}
+                    <div class="flex flex-wrap gap-1">${tagLabels}</div>
+                    ${log.notes ? `<p class="text-xs text-slate-600 mt-1 italic">"${log.notes}"</p>` : ''}
                 </div>
-            `).join('');
+            `;
+        }).join('');
+    }
+
+    function generateReport() {
+        const student = document.getElementById('reportStudentSelect').value;
+        const monthStr = document.getElementById('reportMonth').value;
+
+        if (!student || !monthStr) return alert('Selecione o aluno e o mês.');
+
+        const studentLogs = logs.filter(l => l.student === student && l.date.startsWith(monthStr));
+        document.getElementById('repStudentName').innerText = student;
+        document.getElementById('repPeriod').innerText = `Período: Mês ${monthStr.split('-')[1]}/${monthStr.split('-')[0]}`;
+        
+        document.getElementById('printableReport').classList.remove('hidden');
+
+        if (studentLogs.length === 0) {
+            document.getElementById('repText').innerText = "Não existem anotações registradas para este aluno no mês selecionado.";
+            document.getElementById('repLogList').innerHTML = "<p class='text-xs text-slate-400'>Nenhum histórico encontrado para este período.</p>";
+            return;
         }
 
-        function updateStudentDropdowns() {
-            const options = `<option value="">-- Escolha uma criança --</option>` + 
-                students.map(s => `<option value="${s}">${s}</option>`).join('');
-            document.getElementById('diaryStudentSelect').innerHTML = options;
-            document.getElementById('reportStudentSelect').innerHTML = options;
-        }
-
-        function renderStudentsList() {
-            const container = document.getElementById('studentsList');
-            container.innerHTML = students.map((s, idx) => `
-                <div class="flex justify-between items-center p-3 bg-blue-50/40 rounded-2xl border border-blue-100 text-sm font-medium">
-                    <span class="text-blue-950 font-bold">${s}</span>
-                    <button onclick="removeStudent(${idx})" class="text-pink-600 hover:text-pink-800 text-xs font-bold">Excluir</button>
-                </div>
-            `).join('');
-        }
-
-        document.getElementById('addStudentForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const input = document.getElementById('studentNameInput');
-            const name = input.value.trim();
-            if (name && !students.includes(name)) {
-                students.push(name);
-                localStorage.setItem('app_students', JSON.stringify(students));
-                input.value = '';
-                updateStudentDropdowns();
-                renderStudentsList();
-            }
+        let tagCounts = {};
+        studentLogs.forEach(l => {
+            l.tags.forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
         });
 
-        function removeStudent(index) {
-            if (confirm(`Deseja remover ${students[index]} da lista?`)) {
-                students.splice(index, 1);
-                localStorage.setItem('app_students', JSON.stringify(students));
-                updateStudentDropdowns();
-                renderStudentsList();
-            }
+        let narrative = `Relatório avaliativo mensal referente ao desenvolvimento da criança ${student}.\n\n`;
+        if (tagCounts['eat_good'] > 1) narrative += `Durante o mês, a criança demonstrou ótima adaptação nas refeições, alimentando-se bem na maior parte dos dias. `;
+        if (tagCounts['eat_bad'] > 0) narrative += `Em alguns momentos do mês apresentou certa recusa alimentar, sendo acompanhada com carinho pela equipe. `;
+        if (tagCounts['behavior_good'] > 1) narrative += `Apresentou excelente comportamento geral, demonstrando bom convívio e empatia com os colegas. `;
+        if (tagCounts['behavior_issue'] > 0) narrative += `Houve alguns episódios pontuais de desobediência ou agitação, nos quais trabalhamos o diálogo e a mediação. `;
+        if (tagCounts['sick'] > 0) narrative += `Foram notados alguns dias de indisposição ou sintomas de saúde, exigindo maior atenção e cuidado no período de repouso. `;
+        if (tagCounts['dev_fast'] > 0) narrative += `Destacou-se por apresentar um ritmo de desenvolvimento acelerado e muita facilidade nas atividades propostas. `;
+        if (tagCounts['dev_diff'] > 0) narrative += `Em relação a algumas tarefas, foram identificadas dificuldades pontuais que continuaremos estimulando e apoiando de perto. `;
+
+        narrative += `\n\nNo geral, o aluno(a) segue avançando de forma positiva e enriquecedora em sua jornada escolar ao longo deste mês.`;
+        document.getElementById('repText').innerText = narrative;
+
+        document.getElementById('repLogList').innerHTML = studentLogs.map(l => `
+            <div class="p-3 bg-blue-50/40 rounded-xl text-xs border border-blue-100">
+                <span class="font-bold text-blue-900">${l.date}:</span> 
+                ${l.tags.map(tid => availableTags.find(t => t.id === tid)?.label).filter(Boolean).join(', ')}
+                ${l.notes ? `<span class="block text-slate-500 mt-1 italic">Obs: ${l.notes}</span>` : ''}
+            </div>
+        `).join('');
+    }
+
+    function updateStudentDropdowns() {
+        const options = `<option value="">-- Escolha uma criança --</option>` + 
+            students.map(s => `<option value="${s}">${s}</option>`).join('');
+        document.getElementById('diaryStudentSelect').innerHTML = options;
+        document.getElementById('reportStudentSelect').innerHTML = options;
+    }
+
+    function renderStudentsList() {
+        const container = document.getElementById('studentsList');
+        if (!students || students.length === 0) {
+            container.innerHTML = `<p class="text-xs text-slate-400">Nenhum aluno cadastrado no momento.</p>`;
+            return;
         }
-    </script>
+        container.innerHTML = students.map((s) => `
+            <div class="flex justify-between items-center p-3 bg-blue-50/40 rounded-2xl border border-blue-100 text-sm font-medium">
+                <span class="text-blue-950 font-bold">${s}</span>
+                <span class="text-xs text-slate-400">Gerenciado pelo Painel Admin</span>
+            </div>
+        `).join('');
+    }
+</script>
 </body>
 </html>
