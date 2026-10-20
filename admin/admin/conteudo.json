@@ -1,0 +1,21 @@
+{
+  "titulo_principal": "Bem-vindos à Sala Feliz da Tia Samy!",
+  "subtitulo": "Educação, carinho e aprendizado para o desenvolvimento do seu filho.",
+  "texto_botao": "Fale Comigo no WhatsApp",
+  "titulo_sobre": "Sobre a Tia Samy",
+  "texto_sobre": "Olá! Sou a professora Samy, apaixonada por ensinar e criar momentos inesquecíveis de aprendizado.",
+  "experiencia_destaque": "Mais de 5 anos de experiência com pedagogia infantil.",
+  "titulo_servicos": "Nossos Serviços e Aulas",
+  "descricao_servicos": "Acompanhamento escolar, alfabetização, reforço e atividades lúdicas.",
+  "titulo_depoimentos": "O que os pais dizem",
+  "lista_depoimentos": [
+    {
+      "nome": "Maria Silva",
+      "texto": "A Tia Samy é maravilhosa! Meu filho ama as aulas."
+    }
+  ],
+  "whatsapp": "55859988622311",
+  "email": "tiasamy@email.com",
+  "instagram": "@salafeliz.tiasamy",
+  "endereco": "Fortaleza - CE"
+}
