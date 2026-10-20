@@ -1,0 +1,59 @@
+backend:
+  name: github
+  repo: gylsyangelo/Sala-Feliz-Tia-Samy-2
+  branch: main # Mude para 'master' se sua branch principal for master
+
+media_folder: "assets/images"
+public_folder: "assets/images"
+
+collections:
+  - name: "conteudo"
+    label: "Páginas e Seções do Site"
+    files:
+      - file: "conteudo.json"
+        label: "Página Principal"
+        name: "home"
+        fields:
+          # --- CABEÇALHO / INÍCIO ---
+          - label: "--- Seção Inicial (Banner) ---"
+            name: "header_notice"
+            widget: "hidden"
+          - { label: "Título Principal", name: "titulo_principal", widget: "string" }
+          - { label: "Subtítulo / Frase de Boas-Vindas", name: "subtitulo", widget: "string" }
+          - { label: "Texto do Botão Principal", name: "texto_botao", widget: "string" }
+
+          # --- SOBRE A TIA SAMY ---
+          - label: "--- Quem é a Tia Samy ---"
+            name: "sobre_notice"
+            widget: "hidden"
+          - { label: "Título da Seção Sobre", name: "titulo_sobre", widget: "string" }
+          - { label: "Texto Biográfico / Sobre Mim", name: "texto_sobre", widget: "text" }
+          - { label: "Anos de Experiência / Destaque", name: "experiencia_destaque", widget: "string" }
+
+          # --- SERVIÇOS / AULAS ---
+          - label: "--- Aulas e Serviços ---"
+            name: "servicos_notice"
+            widget: "hidden"
+          - { label: "Título da Seção de Aulas", name: "titulo_servicos", widget: "string" }
+          - { label: "Descrição dos Serviços", name: "descricao_servicos", widget: "text" }
+
+          # --- DEPOIMENTOS / AVALIAÇÕES ---
+          - label: "--- Depoimentos dos Pais/Alunos ---"
+            name: "depoimentos_notice"
+            widget: "hidden"
+          - { label: "Título de Depoimentos", name: "titulo_depoimentos", widget: "string" }
+          - label: "Lista de Depoimentos"
+            name: "lista_depoimentos"
+            widget: "list"
+            fields:
+              - { label: "Nome do Pai/Mãe/Aluno", name: "nome", widget: "string" }
+              - { label: "Depoimento", name: "texto", widget: "text" }
+
+          # --- CONTATO E CONTATOS SOCIAIS ---
+          - label: "--- Informações de Contato ---"
+            name: "contato_notice"
+            widget: "hidden"
+          - { label: "Número do WhatsApp (com DDD)", name: "whatsapp", widget: "string" }
+          - { label: "E-mail de Contato", name: "email", widget: "string" }
+          - { label: "Instagram (@link)", name: "instagram", widget: "string" }
+          - { label: "Endereço ou Cidade/Bairro", name: "endereco", widget: "string" }
