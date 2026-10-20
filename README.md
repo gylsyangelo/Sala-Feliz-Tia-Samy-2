@@ -210,18 +210,17 @@
         let students = JSON.parse(localStorage.getItem('app_students')) || ['Ana Silva', 'Lucas Gabriel', 'Sofia Costa'];
         let logs = JSON.parse(localStorage.getItem('app_logs')) || [];
 
-        const availableTags = [
-            { id: 'eat_good', label: '🍎 Comeu bem' },
-            { id: 'eat_bad', label: '🥗 Não comeu bem / recusou' },
-            { id: 'behavior_good', label: '⭐ Se comportou muito bem' },
-            { id: 'behavior_issue', label: '⚠️ Fez bobeira / desobedeceu' },
-            { id: 'sick', label: '🤒 Está doentinha / indisposta' },
-            { id: 'dev_fast', label: '🚀 Está se desenvolvendo rápido' },
-            { id: 'dev_diff', label: '🧩 Dificuldades em algo específico' },
-            { id: 'nap_good', label: '😴 Dormiu / Descansou bem' }
-            { id: 'nap_good', label: '😴 Não Dormiu ' }
-        ];
-
+       const availableTags = [
+        { id: 'eat_good', label: '🍎 Comeu bem' },
+        { id: 'eat_bad', label: '🥗 Não comeu bem / recusou' },
+        { id: 'behavior_good', label: '⭐ Se comportou muito bem' },
+        { id: 'behavior_issue', label: '⚠️ Fez bobeira / desobedeceu' },
+        { id: 'sick', label: '🤒 Está doentinha / indisposta' },
+        { id: 'dev_fast', label: '🚀 Está se desenvolvendo rápido' },
+        { id: 'dev_diff', label: '🧩 Dificuldades em algo específico' },
+        { id: 'nap_good', label: '😴 Dormiu / Descansou bem' },
+        { id: 'nap_none', label: '😴 Não dormiu' }
+    ];
         let selectedTags = [];
 
         document.addEventListener('DOMContentLoaded', () => {
